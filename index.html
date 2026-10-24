@@ -66,7 +66,16 @@ main{flex:1;min-width:0;padding:22px 26px 60px}
 .kpi{padding:14px 16px}
 .kpi .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
 .kpi .l{color:var(--muted);font-size:12.5px}
-.grid-classi{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-bottom:22px}
+.grid-classi{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:14px;margin-bottom:22px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:14px}
+.duo > *,.grid-classi > *,.kpis > *{min-width:0}
+.lista .li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.lista .li:last-child{border-bottom:0}
+.lista .li:hover b{color:var(--brand)}
+.lista .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.lista .tx b,.lista .tx small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lista small{color:var(--muted);font-size:12px}
+.lista .nums{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}
 .cc{padding:16px;cursor:pointer;transition:border-color .15s}
 .cc:hover{border-color:var(--brand)}
 .cc h3{margin:0 0 10px;font-size:15.5px}
@@ -127,7 +136,8 @@ dialog .df .sp{flex:1}
 .f input,.f select,.f textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .f textarea{min-height:70px;resize:vertical}
 .f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--brand);outline-offset:-1px}
-.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:0 10px}
+.f input,.f select,.f textarea{min-width:0;width:100%}
 .chk{display:flex;gap:8px;align-items:center;margin-bottom:12px}
 .mini{display:flex;flex-wrap:wrap;gap:6px}
 .mini span{border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:12.5px;display:inline-flex;gap:6px;align-items:center}
@@ -456,18 +466,22 @@ function renderHome(){
           <div class="row">Prove fatte <b>${t.prove}</b></div>
         </div>`; }).join('') || '<div class="empty">Nessuna classe. Creane una dal menu a sinistra.</div>'}
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+    <div class="duo">
       <div class="card" style="padding:16px">
         <div class="section-t">⚠️ Studenti con media sotto il 6</div>
-        ${att.length ? `<table class="simple"><tr><th>Studente</th><th>Classe</th><th>Media</th></tr>
-          ${att.map(a => `<tr style="cursor:pointer" data-st="${a.st.id}" data-c="${a.cl.id}"><td>${esc(a.st.nome)}</td><td>${esc(a.cl.nome)}</td><td><span class="chip r">${fmtNum(a.v)}</span></td></tr>`).join('')}</table>`
+        ${att.length ? `<div class="lista">
+          ${att.map(a => `<div class="li" data-st="${a.st.id}" data-c="${a.cl.id}">
+            <div class="tx"><b>${esc(a.st.nome)}</b><small>${esc(a.cl.nome)}</small></div>
+            <span class="chip r">${fmtNum(a.v)}</span></div>`).join('')}</div>`
           : '<div class="hint">Nessuno 🎉</div>'}
       </div>
       <div class="card" style="padding:16px">
         <div class="section-t">🗓 Ultime prove</div>
-        ${ult.length ? `<table class="simple"><tr><th>Data</th><th>Classe</th><th>Prova</th><th>Media</th><th>Insuff.</th></tr>
-          ${ult.slice(0,10).map(u => `<tr style="cursor:pointer" data-cl="${u.cl.id}"><td>${fmtDataL(u.p.data)||'–'}</td><td>${esc(u.cl.nome)}</td><td>${esc(u.p.tipo)||'–'}</td>
-            <td>${u.s.media!=null?`<span class="chip ${u.s.media<6?'r':'g'}">${fmtNum(u.s.media)}</span>`:'–'}</td><td>${u.s.n?u.s.ins+'/'+u.s.n:'–'}</td></tr>`).join('')}</table>`
+        ${ult.length ? `<div class="lista">
+          ${ult.slice(0,10).map(u => `<div class="li" data-cl="${u.cl.id}">
+            <div class="tx"><b>${esc(u.p.tipo) || 'Prova'}</b><small>${fmtDataL(u.p.data) || 'senza data'} · ${esc(u.cl.nome)}</small></div>
+            <div class="nums">${u.s.media!=null?`<span class="chip ${u.s.media<6?'r':'g'}">${fmtNum(u.s.media)}</span>`:'<span class="hint">nessun voto</span>'}
+              ${u.s.n ? `<small>${u.s.ins} insuff. su ${u.s.n}</small>` : ''}</div></div>`).join('')}</div>`
           : '<div class="hint">Ancora nessuna prova.</div>'}
       </div>
     </div>`;
