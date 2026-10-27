@@ -217,10 +217,45 @@ dialog .df .sp{flex:1}
   table.reg .nome{min-width:150px;padding:0 8px}
   header .hide-m{display:none}
 }
+/* pagella */
+.pg-opz{padding:14px 16px 12px;margin-bottom:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:0 14px}
+.pg-opz .hint{grid-column:1/-1}
+.pg{padding:22px 24px}
+.pg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:12px}
+.pg-t{font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+.pg-cl{font-size:22px;font-weight:700}
+.pg-data{color:var(--muted);white-space:nowrap}
+.pg-kpi{display:flex;flex-wrap:wrap;gap:6px 20px;margin-bottom:14px;color:var(--muted);font-size:13px}
+.pg-kpi b{color:var(--ink);font-size:15px;margin-left:4px}
+.pg-tab{width:100%;font-size:13.5px}
+.pg-tab th,.pg-tab td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+.pg-tab th{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;border-bottom:1.5px solid var(--ink)}
+.pg-tab .l{text-align:left}
+.pg-tab .pg-note{white-space:normal;color:var(--muted);font-size:12.5px;min-width:120px}
+.pg-voto{min-width:46px;padding:3px 8px;border-radius:8px;border:1px solid transparent;font:inherit;font-weight:700;font-size:15px;background:var(--cb,var(--line));color:var(--c,var(--ink))}
+.pg-voto.corr::after{content:'*'}
+.pg-prove,.pg-legenda{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
+.pg-firma{margin-top:36px;text-align:right;font-size:13px}
+.pg-solo-tel{display:none}
+@media screen and (max-width:600px){
+  .pg{padding:16px 14px}
+  .pg-cl{font-size:19px}
+  .pg-x{display:none}
+  .pg-tab .l b{white-space:normal}
+  .pg-solo-tel{display:block}
+}
 @media print{
-  header,nav,.top .btn,.legend,.noprint{display:none!important}
-  main{padding:0} .card{box-shadow:none}
+  header,nav,.tabbar,.toast,.top .btn,.legend,.noprint{display:none!important}
+  body{background:#fff}
+  .layout{display:block;min-height:0}
+  main{padding:0} .card{box-shadow:none;border:0}
   table.reg td input{height:auto}
+  .pg{padding:0}
+  .pg .tw{overflow:visible}
+  .pg-tab{font-size:11.5pt}
+  .pg-tab tr{break-inside:avoid}
+  .pg-voto{border:1px solid #999;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{margin:14mm}
 }
 </style>
 </head>
@@ -443,7 +478,7 @@ function renderNav(){
   n.querySelectorAll('[data-go]').forEach(a => a.onclick = () => go({page:a.dataset.go}));
   n.querySelectorAll('[data-cl]').forEach(a => a.onclick = () => go({page:'classe', id:a.dataset.cl}));
   $('#addCl').onclick = () => dlgClasse(null);
-  const tab = view.page === 'classe' ? 'classi' : view.page;
+  const tab = view.page === 'classe' || view.page === 'pagella' ? 'classi' : view.page;
   $('#tabbar').querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
 }
 
@@ -454,7 +489,105 @@ function render(){
   else if(view.page === 'classe' && getClasse(view.id)) renderClasse(getClasse(view.id));
   else if(view.page === 'confronto') renderConfronto();
   else if(view.page === 'classi') renderElencoClassi();
+  else if(view.page === 'pagella' && getClasse(view.id)) renderPagella(getClasse(view.id));
   else renderHome();
+}
+
+// ---------- PAGELLA: riepilogo della classe da stampare o salvare in PDF ----------
+// Le correzioni a mano del voto proposto valgono solo per la stampa (non cambiano i voti)
+const pagella = {arrot: 'intero', periodo: '', corretti: {}};
+const arrotonda = v => v == null ? null : pagella.arrot === 'intero' ? Math.round(v) : pagella.arrot === 'mezzo' ? Math.round(v*2)/2 : Math.round(v*100)/100;
+
+function renderPagella(cl){
+  const righe = cl.studenti.map(st => {
+    const s = statStudente(cl, st), rif = votoRif(cl, s);
+    const auto = arrotonda(rif);
+    const corr = pagella.corretti[st.id];
+    return {st, s, rif, auto, voto: corr != null ? corr : auto, corretto: corr != null};
+  });
+  const conVoto = righe.filter(r => r.voto != null);
+  const sotto = conVoto.filter(r => r.voto < 6).length;
+  const mediaProp = conVoto.length ? conVoto.reduce((a, r) => a + r.voto, 0) / conVoto.length : null;
+  const nomeRif = cl.usaPM ? 'Voto finale' : 'Media pesata';
+
+  $('#main').innerHTML = `
+    <div class="top noprint">
+      <button class="btn" id="pgBack">← ${esc(cl.nome)}</button>
+      <span class="sp"></span>
+      <button class="btn pri" id="pgPrint">🖨 Stampa / salva PDF</button>
+    </div>
+    <div class="card noprint pg-opz">
+      <div class="f"><label for="pgArr">Arrotondamento del voto proposto</label>
+        <select id="pgArr">
+          <option value="intero" ${pagella.arrot==='intero'?'selected':''}>Al voto intero (6,5 → 7)</option>
+          <option value="mezzo" ${pagella.arrot==='mezzo'?'selected':''}>Al mezzo voto (6,3 → 6½)</option>
+          <option value="no" ${pagella.arrot==='no'?'selected':''}>Nessuno (media con decimali)</option>
+        </select></div>
+      <div class="f"><label for="pgPer">Periodo (compare nel titolo)</label><input id="pgPer" value="${esc(pagella.periodo)}" placeholder="es. 1° quadrimestre"></div>
+      <p class="hint" style="margin:0">Tocca un voto proposto per correggerlo a mano: la correzione vale solo per questa stampa, i voti del registro non cambiano.</p>
+      <p class="hint pg-solo-tel" style="margin:6px 0 0">Sul telefono vedi solo nome e voto proposto: nel foglio stampato o nel PDF ci sono tutte le colonne.</p>
+    </div>
+
+    <div class="card pg">
+      <div class="pg-head">
+        <div><div class="pg-t">Riepilogo per lo scrutinio${pagella.periodo ? ' · ' + esc(pagella.periodo) : ''}</div>
+          <div class="pg-cl">${esc(cl.nome)}</div></div>
+        <div class="pg-data">${fmtDataL(today())}</div>
+      </div>
+      <div class="pg-kpi">
+        <span>Studenti <b>${cl.studenti.length}</b></span>
+        <span>Prove <b>${cl.prove.length}</b></span>
+        <span>Media dei voti proposti <b class="tc ${vc(mediaProp)}">${fmtNum(mediaProp)}</b></span>
+        <span>Proposti sotto il 6 <b class="tc ${sotto ? 'v1' : ''}">${sotto}</b></span>
+      </div>
+      <div class="tw">
+        <table class="pg-tab">
+          <thead><tr>
+            <th>N°</th><th class="l">Studente</th><th class="pg-x">Voti</th><th class="pg-x">Insuff.</th><th class="pg-x">${nomeRif}</th>
+            ${cl.usaPM ? '<th class="pg-x">+ / −</th>' : ''}<th>Voto proposto</th><th class="l pg-x">Note</th>
+          </tr></thead>
+          <tbody>
+            ${righe.map((r, i) => `<tr>
+              <td>${i+1}</td>
+              <td class="l"><b>${esc(r.st.nome)}</b></td>
+              <td class="pg-x">${r.s.n}</td>
+              <td class="pg-x">${r.s.ins || ''}</td>
+              <td class="pg-x">${fmtNum(r.rif)}</td>
+              ${cl.usaPM ? `<td class="pg-x">${r.s.piu}+ / ${r.s.meno}−</td>` : ''}
+              <td><button class="pg-voto ${vc(r.voto)} ${r.corretto ? 'corr' : ''}" data-s="${r.st.id}" title="Tocca per correggere">${r.voto == null ? '–' : pagella.arrot === 'no' ? fmtNum(r.voto) : fmtVoto(r.voto)}</button></td>
+              <td class="l pg-note pg-x">${esc(r.st.note)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="pg-prove">
+        <b>Prove considerate:</b>
+        ${cl.prove.map((p, i) => { const x = statProva(cl, p); return `<span>${fmtDataL(p.data) || '#'+(i+1)} ${esc(p.tipo)} (peso ${p.peso}, media ${fmtNum(x.media)})</span>`; }).join(' · ') || 'nessuna'}
+      </div>
+      <div class="pg-legenda">
+        ${cl.usaPM ? `Voto finale = media pesata (o ${fmtNum(cl.votoPartenza, 0)} se non ci sono voti) + saldo dei +/− × ${fmtNum(+cl.valorePM)}, tra 1 e 10.` : 'Media pesata: ogni voto conta secondo il peso della prova.'}
+        ${righe.some(r => r.corretto) ? ' I voti con l’asterisco (*) sono stati corretti a mano.' : ''}
+      </div>
+      <div class="pg-firma">Firma del docente ______________________________</div>
+    </div>`;
+
+  $('#pgBack').onclick = () => go({page:'classe', id: cl.id});
+  $('#pgPrint').onclick = () => window.print();
+  $('#pgArr').onchange = e => { pagella.arrot = e.target.value; renderPagella(cl); };
+  $('#pgPer').oninput = e => { pagella.periodo = e.target.value; $('.pg-t').textContent = 'Riepilogo per lo scrutinio' + (pagella.periodo ? ' · ' + pagella.periodo : ''); };
+  $('#main').querySelectorAll('.pg-voto').forEach(b => b.onclick = () => {
+    const r = righe.find(x => x.st.id === b.dataset.s);
+    openDlg('Voto proposto · ' + esc(r.st.nome), `
+      <p class="hint" style="margin-top:0">Calcolato: <b>${r.auto == null ? '–' : fmtVoto(r.auto)}</b> (${nomeRif.toLowerCase()} ${fmtNum(r.rif)}). La correzione vale solo per la stampa.</p>
+      <div class="f"><label for="pgV">Voto da stampare</label><input id="pgV" inputmode="decimal" value="${r.corretto ? fmtVoto(r.voto) : ''}" placeholder="es. 6, 6½, 7"></div>`,
+      `<button class="btn" id="pgRip">Torna al calcolato</button><span class="sp"></span><button class="btn pri" id="pgOk">Usa questo voto</button>`);
+    $('#pgRip').onclick = () => { delete pagella.corretti[r.st.id]; closeDlg(); renderPagella(cl); };
+    $('#pgOk').onclick = () => {
+      const v = parseVoto($('#pgV').value);
+      if(v == null){ toast('Voto non valido: usa ad es. 6, 6½, 7'); return; }
+      pagella.corretti[r.st.id] = v; closeDlg(); renderPagella(cl);
+    };
+  });
 }
 
 // ---------- PRIMO ACCESSO: registro online vuoto ----------
@@ -604,6 +737,7 @@ function renderClasse(cl){
       <button class="btn" id="bSet" title="Impostazioni classe">⚙️</button>
       <span class="sp"></span>
       <button class="btn" id="bInterr">🎲 Chi interrogo?</button>
+      <button class="btn" id="bPag">🖨 Pagella</button>
       <button class="btn" id="bAddSt">+ Studente</button>
       <button class="btn pri" id="bAddP">+ Nuova prova</button>
     </div>
@@ -624,6 +758,7 @@ function renderClasse(cl){
   $('#bAddSt').onclick = () => dlgNuoviStudenti(cl);
   if($('#bAddSt2')) $('#bAddSt2').onclick = () => dlgNuoviStudenti(cl);
   $('#bInterr').onclick = () => chiInterrogo(cl);
+  $('#bPag').onclick = () => go({page:'pagella', id: cl.id});
   $('#main').querySelectorAll('th.prova').forEach(th => th.onclick = () => dlgProva(cl, th.dataset.p));
   $('#main').querySelectorAll('[data-st]').forEach(e => e.onclick = () => dlgStudente(cl, e.dataset.st));
   $('#main').querySelectorAll('[data-pm]').forEach(b => b.onclick = () => {
