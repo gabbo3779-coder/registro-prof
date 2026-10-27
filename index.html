@@ -19,6 +19,9 @@
   --red:#c62828; --red-soft:#fde8e8; --green:#2e7d32; --green-soft:#e6f4e7;
   --yellow-soft:#fff6cc; --yellow:#8a6d00;
   --shadow:0 1px 2px rgba(20,30,60,.06),0 4px 14px rgba(20,30,60,.06);
+  /* scala dei voti: v1 sotto il 5 · v2 5 · v3 6 · v4 7-8 · v5 9-10 */
+  --v1:#b3261e; --v1b:#fbdcd9; --v2:#c24e00; --v2b:#ffe5cc; --v3:#8a6100; --v3b:#fff1bf;
+  --v4:#2e7d32; --v4b:#e2f3e0; --v5:#0f5a2a; --v5b:#bfe6c8;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -26,6 +29,8 @@
     --brand:#5b8ef0; --brand-2:#7aa4f5; --brand-soft:#1f2b44;
     --red:#ff7b7b; --red-soft:#3a1f22; --green:#7fd18a; --green-soft:#1c3222;
     --yellow-soft:#3a3315; --yellow:#f0d36a; --shadow:none;
+    --v1:#ff8a80; --v1b:#43201e; --v2:#ffb06b; --v2b:#43301c; --v3:#f3d36b; --v3b:#3d3518;
+    --v4:#8fd694; --v4b:#1f3522; --v5:#5fe08a; --v5b:#123d22;
   }
 }
 :root[data-theme="dark"]{
@@ -33,6 +38,8 @@
   --brand:#5b8ef0; --brand-2:#7aa4f5; --brand-soft:#1f2b44;
   --red:#ff7b7b; --red-soft:#3a1f22; --green:#7fd18a; --green-soft:#1c3222;
   --yellow-soft:#3a3315; --yellow:#f0d36a; --shadow:none;
+  --v1:#ff8a80; --v1b:#43201e; --v2:#ffb06b; --v2b:#43301c; --v3:#f3d36b; --v3b:#3d3518;
+  --v4:#8fd694; --v4b:#1f3522; --v5:#5fe08a; --v5b:#123d22;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -104,14 +111,17 @@ table.reg .nome .n{color:var(--muted);display:inline-block;width:22px;font-size:
 table.reg td.nome.poco{background:var(--yellow-soft)}
 table.reg td input{width:64px;height:36px;border:0;background:transparent;text-align:center;font:inherit;color:var(--ink);font-weight:600}
 table.reg td input:focus{outline:2px solid var(--brand);outline-offset:-2px;background:var(--brand-soft)}
-table.reg td.ins,table.reg td.ins input{color:var(--red)}
-table.reg td.ins{background:var(--red-soft)}
 table.reg td.calc{padding:0 10px;min-width:62px;font-weight:600}
 table.reg td.calc.mp{background:var(--brand-soft)}
-table.reg td.calc.ins{background:var(--red-soft);color:var(--red)}
 table.reg tfoot td{font-size:12.5px;color:var(--muted);padding:6px;background:var(--card)}
 table.reg tfoot td.nome{font-weight:600;color:var(--ink)}
-table.reg tfoot td.ins{color:var(--red)}
+/* colori dei voti a scala */
+.v1{--c:var(--v1);--cb:var(--v1b)} .v2{--c:var(--v2);--cb:var(--v2b)} .v3{--c:var(--v3);--cb:var(--v3b)}
+.v4{--c:var(--v4);--cb:var(--v4b)} .v5{--c:var(--v5);--cb:var(--v5b)}
+table.reg td:is(.v1,.v2,.v3,.v4,.v5){background:var(--cb)}
+table.reg td:is(.v1,.v2,.v3,.v4,.v5),table.reg td:is(.v1,.v2,.v3,.v4,.v5) input{color:var(--c)}
+table.reg tfoot td:is(.v1,.v2,.v3,.v4,.v5){background:var(--card)}
+.tc{color:var(--c,inherit)}
 table.reg .sep{border-left:2px solid var(--line)}
 .pm{display:flex;align-items:center;gap:4px;justify-content:center;padding:0 6px}
 .pm button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;padding:0}
@@ -123,7 +133,7 @@ table.reg .sep{border-left:2px solid var(--line)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
 .empty{padding:40px;text-align:center;color:var(--muted)}
 .chip{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600}
-.chip.r{background:var(--red-soft);color:var(--red)} .chip.g{background:var(--green-soft);color:var(--green)}
+.chip:is(.v1,.v2,.v3,.v4,.v5){background:var(--cb);color:var(--c)}
 dialog{border:0;border-radius:14px;padding:0;background:var(--card);color:var(--ink);width:min(560px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog::backdrop{background:rgba(10,15,30,.45)}
 dialog .dh{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
@@ -154,6 +164,30 @@ dialog .df .sp{flex:1}
 .search .res a:hover{background:var(--brand-soft)}
 .search .res small{color:var(--muted)}
 .menu-t{display:none}
+.tabbar{display:none}
+/* classe a schede (telefono) */
+.wide{width:100%;padding:12px;font-weight:600;margin-bottom:12px}
+.schede{display:flex;flex-direction:column;gap:8px}
+.sc{padding:10px 12px}
+.sc.poco{box-shadow:inset 4px 0 0 var(--yellow),var(--shadow)}
+.sc-h{display:flex;align-items:center;gap:10px;cursor:pointer}
+.sc-h .n{color:var(--muted);font-size:12px;width:18px;flex:none;text-align:right}
+.sc-h .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.sc-h .tx b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-h .tx small{color:var(--muted);font-size:12px}
+.sc-h .med{display:flex;flex-direction:column;align-items:center;flex:none}
+.sc-h .med small{color:var(--muted);font-size:10.5px}
+.chip.big{font-size:15px;padding:3px 10px;border-radius:12px}
+.chip.big:not(.v1):not(.v2):not(.v3):not(.v4):not(.v5){background:var(--line);color:var(--muted)}
+.vv{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px 28px}
+.vq{display:flex;flex-direction:column;align-items:center;min-width:46px;padding:4px 6px;border-radius:9px;border:1px solid transparent;background:var(--cb,var(--bg));color:var(--c,var(--ink));line-height:1.15}
+.vq b{font-size:15px}
+.vq small{font-size:10px;opacity:.8}
+.vq.vuoto{border:1px dashed var(--line);color:var(--muted);background:none}
+.sc-pm{display:flex;align-items:center;justify-content:space-between;margin:8px 0 0 28px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.sc-pm .pm button{width:34px;height:34px;font-size:17px}
+.scala{display:inline-flex;gap:4px;align-items:center}
+.scala i{width:auto!important;height:auto!important;padding:1px 7px;border-radius:8px;font-style:normal;font-size:11.5px;font-weight:600;background:var(--cb);color:var(--c)}
 .tk{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
 .tk.tk3{grid-template-columns:repeat(3,1fr)}
 .tk .btn{padding:14px 0;font-size:18px;font-weight:600}
@@ -164,8 +198,14 @@ dialog .df .sp{flex:1}
 @media (max-width:820px){
   nav{position:fixed;top:calc(56px + env(safe-area-inset-top));bottom:0;left:0;z-index:30;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow)}
   nav.open{transform:none}
-  .menu-t{display:inline-block}
-  main{padding:16px}
+  main{padding:16px 16px calc(84px + env(safe-area-inset-bottom))}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(20,30,60,.06)}
+  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;border:0;background:none;color:var(--muted);font-size:11px;font-weight:600}
+  .tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabbar button.on{color:var(--brand)}
+  .tabbar button.on svg{stroke-width:2.3}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom))}
+  .top h2{font-size:19px}
   header .sp{display:none}
   .search{flex:1;min-width:0}
   .search input{width:100%}
@@ -200,6 +240,13 @@ dialog .df .sp{flex:1}
 <div class="layout">
   <nav id="nav"></nav>
   <main id="main"></main>
+</div>
+<!-- barra in basso: si vede solo sul telefono -->
+<div class="tabbar" id="tabbar" role="navigation" aria-label="Navigazione">
+  <button data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Riepilogo</button>
+  <button data-tab="classi"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .7 3.2 2.4 3.5 5.2"/></svg>Classi</button>
+  <button data-tab="confronto"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Confronto</button>
+  <button data-tab="cerca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>Cerca</button>
 </div>
 <dialog id="dlg"></dialog>
 <div class="toast" id="toast"></div>
@@ -332,6 +379,8 @@ function fmtVoto(v){
   if(f === 75) return (i+1) + '-';
   return String(v).replace('.', ',');
 }
+// classe di colore del voto: v1 sotto il 5, v2 da 5, v3 da 6, v4 da 7, v5 da 9
+const vc = v => v == null || isNaN(v) ? '' : v < 5 ? 'v1' : v < 6 ? 'v2' : v < 7 ? 'v3' : v < 9 ? 'v4' : 'v5';
 const fmtNum = (v, d=2) => v == null || isNaN(v) ? '–' : v.toFixed(d).replace('.', ',');
 const fmtData = d => { if(!d) return ''; const [y,m,g] = d.split('-'); return `${g}/${m}`; };
 const fmtDataL = d => { if(!d) return ''; const [y,m,g] = d.split('-'); return `${g}/${m}/${y}`; };
@@ -394,6 +443,8 @@ function renderNav(){
   n.querySelectorAll('[data-go]').forEach(a => a.onclick = () => go({page:a.dataset.go}));
   n.querySelectorAll('[data-cl]').forEach(a => a.onclick = () => go({page:'classe', id:a.dataset.cl}));
   $('#addCl').onclick = () => dlgClasse(null);
+  const tab = view.page === 'classe' ? 'classi' : view.page;
+  $('#tabbar').querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
 }
 
 function render(){
@@ -402,6 +453,7 @@ function render(){
   if(!S.classi.length) renderPrimoAccesso();
   else if(view.page === 'classe' && getClasse(view.id)) renderClasse(getClasse(view.id));
   else if(view.page === 'confronto') renderConfronto();
+  else if(view.page === 'classi') renderElencoClassi();
   else renderHome();
 }
 
@@ -427,6 +479,27 @@ function renderPrimoAccesso(){
   if(SEED.classi.length) $('#impXls').onclick = () => fai(SEED, 'Dati del file Excel importati');
   if(loc) $('#impLoc').onclick = () => fai(loc, 'Dati del browser importati');
   $('#impVuoto').onclick = () => dlgClasse(null);
+}
+
+function cardClasse(cl, t){
+  return `
+    <div class="card cc" data-cl="${cl.id}">
+      <h3>${esc(cl.nome)}</h3>
+      <div class="row">Studenti <b>${t.studenti}</b></div>
+      <div class="row">Media classe${cl.usaPM?' (con +/−)':' (pesata)'} <span class="chip ${vc(t.media)}">${fmtNum(t.media)}</span></div>
+      <div class="row">Studenti con media &lt; 6 <b>${t.sotto6}</b></div>
+      <div class="row">Insufficienze totali <b>${t.ins}</b></div>
+      <div class="row">Prove fatte <b>${t.prove}</b></div>
+    </div>`;
+}
+
+// ---------- ELENCO CLASSI (scheda "Classi" della barra in basso) ----------
+function renderElencoClassi(){
+  $('#main').innerHTML = `
+    <div class="top"><h2>Le mie classi</h2><span class="sp"></span><button class="btn pri" id="bNewCl">+ Nuova classe</button></div>
+    <div class="grid-classi">${S.classi.map(cl => cardClasse(cl, statClasse(cl))).join('')}</div>`;
+  $('#bNewCl').onclick = () => dlgClasse(null);
+  $('#main').querySelectorAll('[data-cl]').forEach(e => e.onclick = () => go({page:'classe', id:e.dataset.cl}));
 }
 
 // ---------- RIEPILOGO ----------
@@ -455,24 +528,14 @@ function renderHome(){
       <div class="card kpi"><div class="v" style="color:var(--red)">${n6}</div><div class="l">Studenti con media &lt; 6</div></div>
       <div class="card kpi"><div class="v">${nIns}</div><div class="l">Insufficienze totali</div></div>
     </div>
-    <div class="grid-classi">
-      ${S.classi.map((cl,i) => { const t = tot[i]; return `
-        <div class="card cc" data-cl="${cl.id}">
-          <h3>${esc(cl.nome)}</h3>
-          <div class="row">Studenti <b>${t.studenti}</b></div>
-          <div class="row">Media classe${cl.usaPM?' (con +/−)':' (pesata)'} <b style="${t.media!=null&&t.media<6?'color:var(--red)':''}">${fmtNum(t.media)}</b></div>
-          <div class="row">Studenti con media &lt; 6 <b>${t.sotto6}</b></div>
-          <div class="row">Insufficienze totali <b>${t.ins}</b></div>
-          <div class="row">Prove fatte <b>${t.prove}</b></div>
-        </div>`; }).join('') || '<div class="empty">Nessuna classe. Creane una dal menu a sinistra.</div>'}
-    </div>
+    <div class="grid-classi">${S.classi.map((cl,i) => cardClasse(cl, tot[i])).join('')}</div>
     <div class="duo">
       <div class="card" style="padding:16px">
         <div class="section-t">⚠️ Studenti con media sotto il 6</div>
         ${att.length ? `<div class="lista">
           ${att.map(a => `<div class="li" data-st="${a.st.id}" data-c="${a.cl.id}">
             <div class="tx"><b>${esc(a.st.nome)}</b><small>${esc(a.cl.nome)}</small></div>
-            <span class="chip r">${fmtNum(a.v)}</span></div>`).join('')}</div>`
+            <span class="chip ${vc(a.v)}">${fmtNum(a.v)}</span></div>`).join('')}</div>`
           : '<div class="hint">Nessuno 🎉</div>'}
       </div>
       <div class="card" style="padding:16px">
@@ -480,7 +543,7 @@ function renderHome(){
         ${ult.length ? `<div class="lista">
           ${ult.slice(0,10).map(u => `<div class="li" data-cl="${u.cl.id}">
             <div class="tx"><b>${esc(u.p.tipo) || 'Prova'}</b><small>${fmtDataL(u.p.data) || 'senza data'} · ${esc(u.cl.nome)}</small></div>
-            <div class="nums">${u.s.media!=null?`<span class="chip ${u.s.media<6?'r':'g'}">${fmtNum(u.s.media)}</span>`:'<span class="hint">nessun voto</span>'}
+            <div class="nums">${u.s.media!=null?`<span class="chip ${vc(u.s.media)}">${fmtNum(u.s.media)}</span>`:'<span class="hint">nessun voto</span>'}
               ${u.s.n ? `<small>${u.s.ins} insuff. su ${u.s.n}</small>` : ''}</div></div>`).join('')}</div>`
           : '<div class="hint">Ancora nessuna prova.</div>'}
       </div>
@@ -513,7 +576,7 @@ function renderConfronto(){
       ${sel.length && maxP ? `<table class="simple">
         <tr><th>Prova</th><th>Tipo</th>${sel.map(c=>`<th>${esc(c.nome)}</th>`).join('')}<th>Media complessiva</th><th>Insuff.</th></tr>
         ${rows.map(r => `<tr${r.tutteRosse?' style="background:var(--red-soft)"':''}><td><b>${r.i+1}</b></td><td>${esc(r.tipo)}</td>
-          ${r.cells.map(x => `<td>${x&&x.media!=null?`<span class="chip ${x.media<6?'r':'g'}">${fmtNum(x.media)}</span>`:'–'}</td>`).join('')}
+          ${r.cells.map(x => `<td>${x&&x.media!=null?`<span class="chip ${vc(x.media)}">${fmtNum(x.media)}</span>`:'–'}</td>`).join('')}
           <td><b>${fmtNum(r.media)}</b></td><td>${r.nv?r.ins:'–'}</td></tr>`).join('')}
       </table>` : '<div class="empty">Seleziona almeno una classe con delle prove.</div>'}
     </div>
@@ -523,13 +586,17 @@ function renderConfronto(){
   });
 }
 
-// ---------- CLASSE (griglia voti) ----------
+// ---------- CLASSE ----------
+// sul telefono (fino a 820px) la classe si vede a schede, sul computer a tabella
+const PICCOLO = () => matchMedia('(max-width: 820px)').matches;
+const LEGENDA_SCALA = `<span class="scala">Voti: <i class="v1">sotto 5</i><i class="v2">5</i><i class="v3">6</i><i class="v4">7–8</i><i class="v5">9–10</i></span>`;
+
 function renderClasse(cl){
   const prove = proveOrdinate(cl);
   const stats = cl.studenti.map(s => statStudente(cl, s));
   const maxN = Math.max(0, ...stats.map(s=>s.n));
   const sc = statClasse(cl);
-  const cls = v => v != null && v < 6 ? 'ins' : '';
+  const schede = PICCOLO();
 
   $('#main').innerHTML = `
     <div class="top">
@@ -541,61 +608,24 @@ function renderClasse(cl){
       <button class="btn pri" id="bAddP">+ Nuova prova</button>
     </div>
     <div class="kpis">
-      <div class="card kpi"><div class="v" style="${cls(sc.media)?'color:var(--red)':''}">${fmtNum(sc.media)}</div><div class="l">Media classe${cl.usaPM?' (voto finale)':' (pesata)'}</div></div>
+      <div class="card kpi"><div class="v tc ${vc(sc.media)}">${fmtNum(sc.media)}</div><div class="l">Media classe${cl.usaPM?' (voto finale)':' (pesata)'}</div></div>
       <div class="card kpi"><div class="v">${sc.studenti}</div><div class="l">Studenti</div></div>
       <div class="card kpi"><div class="v">${sc.prove}</div><div class="l">Prove</div></div>
-      <div class="card kpi"><div class="v" style="color:var(--red)">${sc.sotto6}</div><div class="l">Studenti con media &lt; 6</div></div>
+      <div class="card kpi"><div class="v tc v1">${sc.sotto6}</div><div class="l">Studenti con media &lt; 6</div></div>
       <div class="card kpi"><div class="v">${sc.ins}</div><div class="l">Insufficienze totali</div></div>
     </div>
-    ${cl.studenti.length ? `
-    <div class="card tw regw">
-      <table class="reg" id="reg">
-        <thead><tr>
-          <th class="nome">Studente</th>
-          ${prove.map((p,i) => `<th class="prova" data-p="${p.id}" title="Clicca per modificare la prova">
-              <span class="d">${fmtData(p.data) || '#'+(i+1)}</span>
-              <span class="t">${esc(p.tipo) || '&nbsp;'}</span>
-              <span class="p ${+p.peso===0?'z':''}">${+p.peso===0?'non conta':'peso '+p.peso}</span></th>`).join('')}
-          <th class="sep">Media</th><th>Media<br>pesata</th><th>N°<br>voti</th><th>Insuff.</th>
-          ${cl.usaPM ? `<th class="sep">Interventi<br>+ / −</th><th>Voto finale<br>proposto</th>` : ''}
-        </tr></thead>
-        <tbody>
-          ${cl.studenti.map((st, r) => { const s = stats[r]; return `<tr>
-            <td class="nome ${s.n < maxN ? 'poco' : ''}" data-st="${st.id}" title="${s.n < maxN ? 'Ha meno voti degli altri: candidato da interrogare' : ''}"><span class="n">${r+1}</span>${esc(st.nome)}${st.note?' 📝':''}</td>
-            ${prove.map((p,c) => { const v = st.voti[p.id]; return `<td class="${typeof v==='number'&&v<6?'ins':''}"><input data-r="${r}" data-c="${c}" data-s="${st.id}" data-p="${p.id}" value="${fmtVoto(v)}" inputmode="decimal" ${TOUCH ? 'readonly' : ''} aria-label="Voto ${esc(st.nome)}"></td>`; }).join('')}
-            <td class="calc sep ${cls(s.media)}">${fmtNum(s.media)}</td>
-            <td class="calc mp ${cls(s.mediaP)}">${fmtNum(s.mediaP)}</td>
-            <td class="calc">${s.n}</td>
-            <td class="calc">${s.ins || ''}</td>
-            ${cl.usaPM ? `<td class="sep"><div class="pm">
-                <button class="m" data-pm="-" data-s="${st.id}" title="Aggiungi −">−</button>
-                <span class="c"><span class="g">${s.piu}+</span> / <span class="r">${s.meno}−</span></span>
-                <button class="p" data-pm="+" data-s="${st.id}" title="Aggiungi +">+</button></div></td>
-              <td class="calc mp ${cls(s.finale)}">${fmtNum(s.finale)}</td>` : ''}
-          </tr>`; }).join('')}
-        </tbody>
-        <tfoot>
-          <tr><td class="nome">Media classe</td>${prove.map(p => { const x = statProva(cl,p); return `<td class="${cls(x.media)}">${fmtNum(x.media)}</td>`; }).join('')}<td class="sep" colspan="${cl.usaPM?6:4}"></td></tr>
-          <tr><td class="nome">N° insufficienze</td>${prove.map(p => { const x = statProva(cl,p); return `<td>${x.n ? x.ins : ''}</td>`; }).join('')}<td class="sep" colspan="${cl.usaPM?6:4}"></td></tr>
-          <tr><td class="nome">N° valutati</td>${prove.map(p => `<td>${statProva(cl,p).n}</td>`).join('')}<td class="sep" colspan="${cl.usaPM?6:4}"></td></tr>
-        </tfoot>
-      </table>
-    </div>
-    <div class="legend">
-      <span><i style="background:var(--yellow-soft);border:1px solid var(--line)"></i>Nome giallo = ha meno voti degli altri</span>
-      <span><i style="background:var(--red-soft)"></i>Insufficienza</span>
-      <span>Scrivi i voti così: <b>7</b> · <b>7,5</b> · <b>7+</b> · <b>7-</b> · <b>6/7</b> — Invio = scendi, frecce = muoviti</span>
-    </div>` : `<div class="card empty">Nessuno studente in questa classe.<br><br><button class="btn pri" id="bAddSt2">+ Aggiungi studenti</button></div>`}
-    ${!prove.length && cl.studenti.length ? '<p class="hint">Non ci sono ancora prove: clicca “+ Nuova prova” per aggiungere una colonna.</p>' : ''}
+    ${!cl.studenti.length ? `<div class="card empty">Nessuno studente in questa classe.<br><br><button class="btn pri" id="bAddSt2">+ Aggiungi studenti</button></div>`
+      : schede ? schedeClasse(cl, prove, stats, maxN) : tabellaClasse(cl, prove, stats, maxN)}
+    ${!prove.length && cl.studenti.length ? '<p class="hint">Non ci sono ancora prove: tocca “+ Nuova prova” per aggiungerne una.</p>' : ''}
   `;
 
   $('#bSet').onclick = () => dlgClasse(cl);
-  $('#bAddP').onclick = () => dlgProva(cl, null);
+  $('#bAddP').onclick = () => dlgProva(cl, null, schede ? p => sequenza(cl, p, 0) : null);
   $('#bAddSt').onclick = () => dlgNuoviStudenti(cl);
   if($('#bAddSt2')) $('#bAddSt2').onclick = () => dlgNuoviStudenti(cl);
   $('#bInterr').onclick = () => chiInterrogo(cl);
   $('#main').querySelectorAll('th.prova').forEach(th => th.onclick = () => dlgProva(cl, th.dataset.p));
-  $('#main').querySelectorAll('td.nome[data-st]').forEach(td => td.onclick = () => dlgStudente(cl, td.dataset.st));
+  $('#main').querySelectorAll('[data-st]').forEach(e => e.onclick = () => dlgStudente(cl, e.dataset.st));
   $('#main').querySelectorAll('[data-pm]').forEach(b => b.onclick = () => {
     const st = cl.studenti.find(s => s.id === b.dataset.s);
     const x = {id: uid(), segno: b.dataset.pm, data: today()};
@@ -604,8 +634,27 @@ function renderClasse(cl){
     toast(`${b.dataset.pm === '+' ? '➕' : '➖'} ${st.nome}`);
   });
 
+  if(schede){
+    if($('#bSeq')) $('#bSeq').onclick = () => scegliProva(cl);
+    $('#main').querySelectorAll('.vq').forEach(b => b.onclick = () => {
+      const st = cl.studenti.find(s => s.id === b.dataset.s), p = cl.prove.find(x => x.id === b.dataset.p);
+      tastierino(cl, st, p, {onSave: raw => { closeDlg(); salvaVoto(cl, st, p.id, raw); renderClasse(cl); }});
+    });
+    return;
+  }
+
   const inputs = $('#main').querySelectorAll('#reg input');
-  if(TOUCH){ inputs.forEach(inp => inp.onclick = () => tastierino(cl, inp)); return; }
+  if(TOUCH){   // tablet: tabella, ma il voto si sceglie dal tastierino
+    inputs.forEach(inp => inp.onclick = () => {
+      const st = cl.studenti.find(s => s.id === inp.dataset.s), p = cl.prove.find(x => x.id === inp.dataset.p);
+      tastierino(cl, st, p, {onSave: raw => {
+        closeDlg(); salvaVoto(cl, st, p.id, raw); renderClasse(cl);
+        const next = $(`#reg input[data-r="${+inp.dataset.r + 1}"][data-c="${inp.dataset.c}"]`);
+        if(next) setTimeout(() => next.click(), 150);   // passa subito allo studente dopo
+      }});
+    });
+    return;
+  }
   inputs.forEach(inp => {
     inp.addEventListener('focus', () => inp.select());
     inp.addEventListener('change', () => commitVoto(cl, inp));
@@ -626,52 +675,151 @@ function renderClasse(cl){
   });
 }
 
-function commitVoto(cl, inp, focusNext){
-  const st = cl.studenti.find(s => s.id === inp.dataset.s);
-  const raw = inp.value.trim();
-  const pid = inp.dataset.p;
+function schedeClasse(cl, prove, stats, maxN){
+  return `
+    <button class="btn pri wide" id="bSeq">✏️ Inserisci i voti di una prova</button>
+    <div class="schede">
+      ${cl.studenti.map((st, r) => { const s = stats[r], rif = votoRif(cl, s); return `
+      <div class="card sc ${s.n < maxN ? 'poco' : ''}">
+        <div class="sc-h" data-st="${st.id}">
+          <span class="n">${r+1}</span>
+          <div class="tx"><b>${esc(st.nome)}${st.note?' 📝':''}</b>
+            <small>${s.n} ${s.n===1?'voto':'voti'}${s.ins ? ` · ${s.ins} insuff.` : ''}${s.n < maxN ? ' · da interrogare' : ''}</small></div>
+          <div class="med"><span class="chip big ${vc(rif)}">${rif == null ? '–' : fmtNum(rif)}</span><small>${cl.usaPM ? 'voto finale' : 'media'}</small></div>
+        </div>
+        ${prove.length ? `<div class="vv">${prove.map((p,i) => { const v = st.voti[p.id], ha = typeof v === 'number'; return `
+          <button class="vq ${ha ? vc(v) : 'vuoto'}" data-s="${st.id}" data-p="${p.id}" aria-label="${esc(p.tipo || 'Prova')} ${fmtDataL(p.data)}: ${ha ? fmtVoto(v) : 'nessun voto'}">
+            <b>${ha ? fmtVoto(v) : '–'}</b><small>${fmtData(p.data) || '#'+(i+1)}</small></button>`; }).join('')}</div>` : ''}
+        ${cl.usaPM ? `<div class="sc-pm"><span>Interventi in classe</span><div class="pm">
+            <button class="m" data-pm="-" data-s="${st.id}" aria-label="Aggiungi −">−</button>
+            <span class="c"><span class="g">${s.piu}+</span> / <span class="r">${s.meno}−</span></span>
+            <button class="p" data-pm="+" data-s="${st.id}" aria-label="Aggiungi +">+</button></div></div>` : ''}
+      </div>`; }).join('')}
+    </div>
+    <div class="legend">${LEGENDA_SCALA}<span><i style="background:var(--yellow);width:4px"></i>Bordo giallo = ha meno voti degli altri</span></div>`;
+}
+
+function tabellaClasse(cl, prove, stats, maxN){
+  return `
+    <div class="card tw regw">
+      <table class="reg" id="reg">
+        <thead><tr>
+          <th class="nome">Studente</th>
+          ${prove.map((p,i) => `<th class="prova" data-p="${p.id}" title="Clicca per modificare la prova">
+              <span class="d">${fmtData(p.data) || '#'+(i+1)}</span>
+              <span class="t">${esc(p.tipo) || '&nbsp;'}</span>
+              <span class="p ${+p.peso===0?'z':''}">${+p.peso===0?'non conta':'peso '+p.peso}</span></th>`).join('')}
+          <th class="sep">Media</th><th>Media<br>pesata</th><th>N°<br>voti</th><th>Insuff.</th>
+          ${cl.usaPM ? `<th class="sep">Interventi<br>+ / −</th><th>Voto finale<br>proposto</th>` : ''}
+        </tr></thead>
+        <tbody>
+          ${cl.studenti.map((st, r) => { const s = stats[r]; return `<tr>
+            <td class="nome ${s.n < maxN ? 'poco' : ''}" data-st="${st.id}" title="${s.n < maxN ? 'Ha meno voti degli altri: candidato da interrogare' : ''}"><span class="n">${r+1}</span>${esc(st.nome)}${st.note?' 📝':''}</td>
+            ${prove.map((p,c) => { const v = st.voti[p.id]; return `<td class="${vc(v)}"><input data-r="${r}" data-c="${c}" data-s="${st.id}" data-p="${p.id}" value="${fmtVoto(v)}" inputmode="decimal" ${TOUCH ? 'readonly' : ''} aria-label="Voto ${esc(st.nome)}"></td>`; }).join('')}
+            <td class="calc sep ${vc(s.media)}">${fmtNum(s.media)}</td>
+            <td class="calc mp ${vc(s.mediaP)}">${fmtNum(s.mediaP)}</td>
+            <td class="calc">${s.n}</td>
+            <td class="calc">${s.ins || ''}</td>
+            ${cl.usaPM ? `<td class="sep"><div class="pm">
+                <button class="m" data-pm="-" data-s="${st.id}" title="Aggiungi −">−</button>
+                <span class="c"><span class="g">${s.piu}+</span> / <span class="r">${s.meno}−</span></span>
+                <button class="p" data-pm="+" data-s="${st.id}" title="Aggiungi +">+</button></div></td>
+              <td class="calc mp ${vc(s.finale)}">${fmtNum(s.finale)}</td>` : ''}
+          </tr>`; }).join('')}
+        </tbody>
+        <tfoot>
+          <tr><td class="nome">Media classe</td>${prove.map(p => { const x = statProva(cl,p); return `<td class="tc ${vc(x.media)}">${fmtNum(x.media)}</td>`; }).join('')}<td class="sep" colspan="${cl.usaPM?6:4}"></td></tr>
+          <tr><td class="nome">N° insufficienze</td>${prove.map(p => { const x = statProva(cl,p); return `<td>${x.n ? x.ins : ''}</td>`; }).join('')}<td class="sep" colspan="${cl.usaPM?6:4}"></td></tr>
+          <tr><td class="nome">N° valutati</td>${prove.map(p => `<td>${statProva(cl,p).n}</td>`).join('')}<td class="sep" colspan="${cl.usaPM?6:4}"></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="legend">
+      ${LEGENDA_SCALA}
+      <span><i style="background:var(--yellow-soft);border:1px solid var(--line)"></i>Nome giallo = ha meno voti degli altri</span>
+      <span>Scrivi i voti così: <b>7</b> · <b>7,5</b> · <b>7+</b> · <b>7-</b> · <b>6/7</b> — Invio = scendi, frecce = muoviti</span>
+    </div>`;
+}
+
+// salva (o cancella, se raw è vuoto) il voto di uno studente in una prova
+function salvaVoto(cl, st, pid, raw){
+  raw = String(raw).trim();
   if(raw === ''){
     delete st.voti[pid];
     run(sb.from('voti').delete().eq('studente_id', st.id).eq('prova_id', pid));
-  } else {
-    const v = parseVoto(raw);
-    if(v == null){ toast('Voto non valido: usa ad es. 7, 7,5, 7+, 7-, 6/7'); inp.value = fmtVoto(st.voti[pid]); return; }
-    st.voti[pid] = v;
-    run(sb.from('voti').upsert({studente_id: st.id, prova_id: pid, voto: v, updated_at: new Date().toISOString()}));
+    return true;
   }
+  const v = parseVoto(raw);
+  if(v == null){ toast('Voto non valido: usa ad es. 7, 7,5, 7+, 7-, 6/7'); return false; }
+  st.voti[pid] = v;
+  run(sb.from('voti').upsert({studente_id: st.id, prova_id: pid, voto: v, updated_at: new Date().toISOString()}));
+  return true;
+}
+
+function commitVoto(cl, inp, focusNext){
+  const st = cl.studenti.find(s => s.id === inp.dataset.s);
+  if(!salvaVoto(cl, st, inp.dataset.p, inp.value)){ inp.value = fmtVoto(st.voti[inp.dataset.p]); return; }
   const pos = focusNext || {r:+inp.dataset.r, c:+inp.dataset.c, stay:true};
   renderClasse(cl);
   const el = $(`#reg input[data-r="${pos.r}"][data-c="${pos.c}"]`);
   if(el && !pos.stay) el.focus();
 }
 
-// Sul telefono la tastiera numerica non ha + e −: tocco la cella e scelgo il voto da qui
-function tastierino(cl, inp){
-  const st = cl.studenti.find(s => s.id === inp.dataset.s), p = cl.prove.find(x => x.id === inp.dataset.p);
+// Sul telefono la tastiera numerica non ha + e −: il voto si sceglie da qui.
+// opts.onSave(testo) riceve il voto scelto ('' = cancella); opts.passo / opts.salta per l'inserimento in sequenza
+function tastierino(cl, st, p, opts){
   let base = null, mod = '';
   const cur = st.voti[p.id];
   const testo = () => base == null ? '' : (mod === '½' ? base + '½' : base + mod);
-  openDlg(esc(st.nome), `
+  openDlg(esc(st.nome) + (opts.passo ? ` <small style="color:var(--muted);font-weight:400">· ${opts.passo}</small>` : ''), `
     <p class="hint" style="margin:0 0 10px">${esc(p.tipo) || 'Prova'} ${p.data ? '· ' + fmtDataL(p.data) : ''} · voto attuale: <b>${fmtVoto(cur) || '—'}</b></p>
     <div id="tkV" style="text-align:center;font-size:34px;font-weight:700;min-height:48px">${fmtVoto(cur) || '—'}</div>
-    <div class="tk">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button class="btn" data-n="${n}">${n}</button>`).join('')}</div>
+    <div class="tk">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button class="btn ${vc(n)}" data-n="${n}">${n}</button>`).join('')}</div>
     <div class="tk tk3">${['+','½','-'].map(m => `<button class="btn" data-m="${m}">${m === '-' ? '−' : m}</button>`).join('')}</div>`,
-    `<button class="btn dang" id="tkDel">Cancella voto</button><span class="sp"></span><button class="btn pri" id="tkOk" disabled>Salva</button>`);
+    `<button class="btn dang" id="tkDel">${cur == null ? 'Nessun voto' : 'Cancella voto'}</button><span class="sp"></span>
+     ${opts.salta ? '<button class="btn" id="tkSkip">Salta</button>' : ''}<button class="btn pri" id="tkOk" disabled>Salva</button>`);
   const agg = () => {
-    $('#tkV').textContent = testo() || '—';
+    const t = testo();
+    $('#tkV').textContent = t || '—';
+    $('#tkV').className = 'tc ' + vc(parseVoto(t));
     $('#tkOk').disabled = base == null;
     $('#dlg').querySelectorAll('[data-n]').forEach(b => b.classList.toggle('pri', +b.dataset.n === base));
     $('#dlg').querySelectorAll('[data-m]').forEach(b => b.classList.toggle('pri', b.dataset.m === mod));
   };
+  $('#tkV').className = 'tc ' + vc(cur);
   $('#dlg').querySelectorAll('[data-n]').forEach(b => b.onclick = () => { base = +b.dataset.n; if(base === 10 && mod !== '-') mod = ''; agg(); });
   $('#dlg').querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mod = mod === b.dataset.m ? '' : b.dataset.m; agg(); });
-  const salva = val => {
-    inp.value = val; closeDlg(); commitVoto(cl, inp);
-    const next = $(`#reg input[data-r="${+inp.dataset.r + 1}"][data-c="${inp.dataset.c}"]`);
-    if(next) setTimeout(() => next.click(), 150);   // passa subito allo studente dopo
-  };
-  $('#tkOk').onclick = () => { if(base === 10 && (mod === '+' || mod === '½')) { toast('Il massimo è 10'); return; } salva(testo()); };
-  $('#tkDel').onclick = () => salva('');
+  $('#tkOk').onclick = () => { if(base === 10 && (mod === '+' || mod === '½')) { toast('Il massimo è 10'); return; } opts.onSave(testo()); };
+  $('#tkDel').onclick = () => opts.onSave('');
+  if(opts.salta) $('#tkSkip').onclick = opts.salta;
+}
+
+// "Inserisci i voti di una prova": scelgo la prova e passo uno studente dopo l'altro
+function scegliProva(cl){
+  const prove = cl.prove.map((p, i) => ({p, i, s: statProva(cl, p)})).reverse();   // le più recenti in alto
+  openDlg('Quale prova?', `
+    <div class="lista">
+      <div class="li" data-nuova><div class="tx"><b>+ Nuova prova</b><small>con la data di oggi</small></div></div>
+      ${prove.map(x => `<div class="li" data-p="${x.p.id}">
+        <div class="tx"><b>${esc(x.p.tipo) || 'Prova ' + (x.i+1)}</b><small>${fmtDataL(x.p.data) || 'senza data'} · ${x.s.n} voti su ${cl.studenti.length}</small></div>
+        ${x.s.media != null ? `<span class="chip ${vc(x.s.media)}">${fmtNum(x.s.media)}</span>` : ''}</div>`).join('')}
+    </div>`, `<button class="btn" data-x>Annulla</button>`);
+  $('#dlg').querySelector('[data-nuova]').onclick = () => dlgProva(cl, null, p => sequenza(cl, p, 0));
+  $('#dlg').querySelectorAll('[data-p]').forEach(e => e.onclick = () => {
+    const p = cl.prove.find(x => x.id === e.dataset.p);
+    // parto dal primo studente che non ha ancora il voto
+    const i = cl.studenti.findIndex(st => typeof st.voti[p.id] !== 'number');
+    sequenza(cl, p, i < 0 ? 0 : i);
+  });
+}
+function sequenza(cl, p, i){
+  if(i >= cl.studenti.length){ closeDlg(); renderClasse(cl); toast('✓ Voti della prova inseriti'); return; }
+  const st = cl.studenti[i];
+  tastierino(cl, st, p, {
+    passo: `${i+1} di ${cl.studenti.length}`,
+    onSave: raw => { if(salvaVoto(cl, st, p.id, raw)){ renderClasse(cl); sequenza(cl, p, i+1); } },
+    salta: () => sequenza(cl, p, i+1),
+  });
 }
 
 function chiInterrogo(cl){
@@ -700,7 +848,8 @@ function openDlg(title, body, foot){
 }
 const closeDlg = () => $('#dlg').close();
 
-function dlgProva(cl, pid){
+// dopo(prova): cosa fare appena una prova NUOVA è salvata (es. iniziare a inserire i voti)
+function dlgProva(cl, pid, dopo){
   const p = pid ? cl.prove.find(x => x.id === pid) : {data: today(), tipo:'', peso:1};
   const tipi = [...new Set(S.classi.flatMap(c => c.prove.map(x=>x.tipo)).filter(Boolean))];
   openDlg(pid ? 'Modifica prova' : 'Nuova prova', `
@@ -714,13 +863,18 @@ function dlgProva(cl, pid){
       <datalist id="tipiL">${tipi.map(t=>`<option value="${esc(t)}">`).join('')}</datalist></div>`,
     `${pid ? '<button class="btn dang" id="pDel">Elimina prova</button><span class="sp"></span>' : ''}
      <button class="btn" data-x>Annulla</button><button class="btn pri" id="pOk">${pid ? 'Salva' : 'Aggiungi'}</button>`);
-  $('#pOk').onclick = () => {
+  $('#pOk').onclick = async () => {
     const np = {data: $('#pData').value, tipo: $('#pTipo').value.trim(), peso: +$('#pPeso').value};
     let pr = p;
     if(pid) Object.assign(p, np); else cl.prove.push(pr = {id: uid(), ...np});
-    run(sb.from('prove').upsert(dbProva(cl, pr)));
+    $('#pOk').disabled = true;
+    // aspetto che la prova sia salvata: i voti che seguono la richiamano
+    const ok = await run(sb.from('prove').upsert(dbProva(cl, pr)));
     closeDlg(); renderClasse(cl);
-    if(!pid){ const c = cl.prove.length-1; const el = $(`#reg input[data-r="0"][data-c="${c}"]`); if(el){ el.focus(); el.scrollIntoView({inline:'center', block:'nearest'}); } }
+    if(pid || !ok) return;
+    if(dopo) return dopo(pr);
+    const el = $(`#reg input[data-r="0"][data-c="${cl.prove.length-1}"]`);
+    if(el){ el.focus(); el.scrollIntoView({inline:'center', block:'nearest'}); }
   };
   if(pid) $('#pDel').onclick = () => {
     const n = cl.studenti.filter(s => typeof s.voti[pid] === 'number').length;
@@ -794,7 +948,7 @@ function chartSVG(points){
   let g = '';
   for(const v of [2,4,6,8,10]) g += `<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" ${v===6?'stroke-dasharray="4 3" stroke="var(--red)" opacity=".6"':''}/><text x="${pl-6}" y="${Y(v)+4}" font-size="10" text-anchor="end" fill="var(--muted)">${v}</text>`;
   const d = points.map((p,i) => `${i?'L':'M'}${X(i)},${Y(p.v)}`).join(' ');
-  const dots = points.map((p,i) => `<circle cx="${X(i)}" cy="${Y(p.v)}" r="4" fill="${p.v<6?'var(--red)':'var(--brand)'}"><title>${esc(p.x)}: ${fmtVoto(p.v)}</title></circle><text x="${X(i)}" y="${H-6}" font-size="10" text-anchor="middle" fill="var(--muted)">${esc(p.x)}</text>`).join('');
+  const dots = points.map((p,i) => `<circle cx="${X(i)}" cy="${Y(p.v)}" r="4" fill="var(--${vc(p.v) || 'brand'})"><title>${esc(p.x)}: ${fmtVoto(p.v)}</title></circle><text x="${X(i)}" y="${H-6}" font-size="10" text-anchor="middle" fill="var(--muted)">${esc(p.x)}</text>`).join('');
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Andamento voti">${g}<path d="${d}" fill="none" stroke="var(--brand)" stroke-width="2"/>${dots}</svg>`;
 }
 
@@ -805,14 +959,14 @@ function dlgStudente(cl, sid){
   const pts = vv.filter(x => typeof x.v === 'number').map(x => ({x: fmtData(x.p.data) || '#'+(x.i+1), v: x.v}));
   openDlg(esc(st.nome) + ` <small style="color:var(--muted);font-weight:400">· ${esc(cl.nome)}</small>`, `
     <div class="kpis" style="grid-template-columns:repeat(${cl.usaPM?4:3},1fr);margin-bottom:8px">
-      <div class="card kpi"><div class="v" style="font-size:20px;${s.mediaP!=null&&s.mediaP<6?'color:var(--red)':''}">${fmtNum(s.mediaP)}</div><div class="l">Media pesata</div></div>
+      <div class="card kpi"><div class="v tc ${vc(s.mediaP)}" style="font-size:20px">${fmtNum(s.mediaP)}</div><div class="l">Media pesata</div></div>
       <div class="card kpi"><div class="v" style="font-size:20px">${s.n}</div><div class="l">Voti</div></div>
       <div class="card kpi"><div class="v" style="font-size:20px">${s.ins}</div><div class="l">Insufficienze</div></div>
-      ${cl.usaPM ? `<div class="card kpi"><div class="v" style="font-size:20px;${s.finale!=null&&s.finale<6?'color:var(--red)':''}">${fmtNum(s.finale)}</div><div class="l">Voto finale</div></div>` : ''}
+      ${cl.usaPM ? `<div class="card kpi"><div class="v tc ${vc(s.finale)}" style="font-size:20px">${fmtNum(s.finale)}</div><div class="l">Voto finale</div></div>` : ''}
     </div>
     ${chartSVG(pts)}
     <table class="simple" style="margin-bottom:14px"><tr><th>Data</th><th>Prova</th><th>Peso</th><th>Voto</th></tr>
-      ${vv.map(x => `<tr><td>${fmtDataL(x.p.data)||'–'}</td><td>${esc(x.p.tipo)||'–'}</td><td>${x.p.peso}</td><td>${typeof x.v==='number'?`<span class="chip ${x.v<6?'r':'g'}">${fmtVoto(x.v)}</span>`:'<span style="color:var(--muted)">—</span>'}</td></tr>`).join('') || '<tr><td colspan="4" class="hint">Nessuna prova</td></tr>'}
+      ${vv.map(x => `<tr><td>${fmtDataL(x.p.data)||'–'}</td><td>${esc(x.p.tipo)||'–'}</td><td>${x.p.peso}</td><td>${typeof x.v==='number'?`<span class="chip ${vc(x.v)}">${fmtVoto(x.v)}</span>`:'<span style="color:var(--muted)">—</span>'}</td></tr>`).join('') || '<tr><td colspan="4" class="hint">Nessuna prova</td></tr>'}
     </table>
     ${cl.usaPM ? `<div class="f"><label>Interventi in classe (${s.piu} +, ${s.meno} −, saldo ${s.saldo>0?'+':''}${s.saldo}) — clicca ✕ per togliere</label>
       <div class="mini">${st.pm.map((x,i) => `<span><b style="color:${x.segno==='+'?'var(--green)':'var(--red)'}">${x.segno==='+'?'+':'−'}</b>${x.data?fmtData(x.data):''}<button data-del="${i}" title="Togli">✕</button></span>`).join('') || '<span style="border:0;color:var(--muted)">nessuno</span>'}</div></div>` : ''}
@@ -916,6 +1070,17 @@ $('#bTheme').onclick = () => {
 };
 $('#bBackup').onclick = dlgBackup;
 $('#menuT').onclick = () => $('#nav').classList.toggle('open');
+$('#tabbar').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+  if(b.dataset.tab !== 'cerca') return go({page: b.dataset.tab});
+  window.scrollTo(0, 0); $('#q').focus();
+});
+// passando da telefono a computer (o ruotando il tablet) ridisegno la classe nel modo giusto
+let eraPiccolo = PICCOLO();
+addEventListener('resize', () => {
+  if(PICCOLO() === eraPiccolo) return;
+  eraPiccolo = PICCOLO();
+  if(caricato && view.page === 'classe' && !$('#dlg').open) render();
+});
 
 // ---------- accesso ----------
 let utente = null, primoEvento = true;
